@@ -1,6 +1,6 @@
 ![banner-01](https://cloud.githubusercontent.com/assets/1287098/20438501/9abc0c50-adc0-11e6-845c-e4fef798a0d7.png)
 
-## Simplified VMWare API client
+## Simplified VMWare API client for Python
 
 vmc is designed to be the simplest way possible to use VMWare's api library - [pyvmomi](https://github.com/vmware/pyvmomi).
 
