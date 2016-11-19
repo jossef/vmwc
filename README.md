@@ -44,3 +44,11 @@ pip install vmc
  - [virtual switches create new](examples/virtual-switches-create-new.py)
  - [virtual switches delete](examples/virtual-switches-delete.py)
  - [virtual switches list](examples/virtual-switches-list.py)
+ 
+ 
+### History
+When I searched for a library to write automation scripts to control my esxi environment, I bumped into [pyvmomi](http://github.com/vmware/pyvmomi). My first impression was "It's too low-level and the general Development Experience doesn't feel easy to use". Therefore, on me break time, I wrote `vmc` on the base of [pyvmomi](http://github.com/vmware/pyvmomi) to provide a lighter, TL;DR feeling and straight-forward API.
+
+### Remarks
+vmc was developed to control a single esxi machine at a time. However, it should work with vcenter instances as well
+
