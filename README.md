@@ -1,13 +1,13 @@
-![banner-01](https://cloud.githubusercontent.com/assets/1287098/20438501/9abc0c50-adc0-11e6-845c-e4fef798a0d7.png)
+![banner-01](https://cloud.githubusercontent.com/assets/1287098/20639453/98539642-b3cc-11e6-8d34-b262a34e62f6.png)
 
 ## Simplified VMWare API client for Python
 
-vmc is designed to be the simplest way possible to use VMWare's API
+vmwc is designed to be the simplest way possible to use VMWare's API
 
 
 ```python
 
-from vmc import VMWareClient
+from vmwc import VMWareClient
 
 host = '192.168.1.1'
 username = '<username>'
@@ -22,7 +22,7 @@ with VMWareClient(host, username, password) as client:
 ### Installation
 
 ```
-pip install vmc
+pip install vmwc
 ```
 
 ### Examples
@@ -47,8 +47,8 @@ pip install vmc
  
  
 ### History
-When I searched for a library to write automation scripts to control my esxi environment, I bumped into [pyvmomi](http://github.com/vmware/pyvmomi). My first impression was "It's too low-level and the general Development Experience doesn't feel easy to use". Therefore, on me break time, I wrote `vmc` on the base of [pyvmomi](http://github.com/vmware/pyvmomi) to provide a lighter, TL;DR feeling and straight-forward API.
+When I searched for a library to write automation scripts to control my esxi environment, I bumped into [pyvmomi](http://github.com/vmware/pyvmomi). My first impression was "It's too low-level and the general Development Experience doesn't feel easy to use". Therefore, on me break time, I wrote `vmwc` on the base of [pyvmomi](http://github.com/vmware/pyvmomi) to provide a lighter, TL;DR feeling and straight-forward API.
 
 ### Remarks
-vmc was developed to control a single esxi machine at a time. However, it should work with vcenter instances as well
+vmwc was developed to control a single esxi machine at a time. However, it should work with vcenter instances as well
 

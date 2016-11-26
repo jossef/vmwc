@@ -18,7 +18,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='vmc',
+    name='vmwc',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -29,7 +29,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/jossef/python-vmware-client',
+    url='https://github.com/jossef/vmwc',
 
     # Author details
     author='Jossef Harush',
@@ -65,11 +65,11 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='vmc vmware pyvmomi python client vix setuptools development',
+    keywords='vmwc vmware pyvmomi python client vix setuptools development',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=['vmc'],
+    packages=['vmwc'],
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -94,7 +94,7 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     # package_data={
-    #     'vmc': ['package_data.dat'],
+    #     'vmwc': ['package_data.dat'],
     # },
 
     # Although 'package_data' is the preferred approach, in some case you may

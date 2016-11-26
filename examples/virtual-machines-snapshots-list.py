@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from vmc import VMWareClient
+from vmwc import VMWareClient
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
     with VMWareClient(host, username, password) as client:
         for vm in client.get_virtual_machines():
             print vm.name
-            
+
             for snapshot in vm.get_snapshots():
                 print '\t', snapshot.name
 

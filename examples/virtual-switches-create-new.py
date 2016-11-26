@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from vmc import VMWareClient
+from vmwc import VMWareClient
 
 
 def main():
