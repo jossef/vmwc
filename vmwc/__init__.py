@@ -25,7 +25,7 @@ try:
     from pyVmomi import vim, vmodl
 
 except Exception as e:
-    print 'failed to import pyVmomi.', e
+    print ('failed to import pyVmomi.', e)
     sys.exit(1)
 
 
