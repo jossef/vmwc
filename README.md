@@ -1,4 +1,4 @@
-![banner-01](https://cloud.githubusercontent.com/assets/1287098/20639453/98539642-b3cc-11e6-8d34-b262a34e62f6.png)
+![banner-01](https://cloud.githubusercontent.com/assets/1287098/23579240/b873ab2a-00f1-11e7-99f0-2d31b0f0e1e0.png)
 
 ## Simplified VMWare API client for Python
 
@@ -39,6 +39,7 @@ pip install vmwc
  - [virtual machines reconfigure network interfaces](examples/virtual-machines-reconfigure-network-interfaces.py)
  - [virtual machines snapshots delete all](examples/virtual-machines-snapshots-delete-all.py)
  - [virtual machines snapshots delete specific](examples/virtual-machines-snapshots-delete-specific.py)
+ - [virtual machines snapshots revert](examples/virtual-machines-snapshots-revert.py)
  - [virtual machines snapshots list ](examples/virtual-machines-snapshots-list.py)
  - [virtual machines snapshots new](examples/virtual-machines-snapshots-new.py)
  - [virtual switches create new](examples/virtual-switches-create-new.py)

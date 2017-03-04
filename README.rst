@@ -1,4 +1,4 @@
-.. image:: https://cloud.githubusercontent.com/assets/1287098/20639453/98539642-b3cc-11e6-8d34-b262a34e62f6.png
+.. image:: https://cloud.githubusercontent.com/assets/1287098/23579240/b873ab2a-00f1-11e7-99f0-2d31b0f0e1e0.png
 
 
 Simplified VMWare API client for Python
@@ -42,6 +42,7 @@ Examples
 - `virtual machines reconfigure network interfaces <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-reconfigure-network-interfaces.py>`_
 - `virtual machines snapshots delete all <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-snapshots-delete-all.py>`_
 - `virtual machines snapshots delete specific <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-snapshots-delete-specific.py>`_
+- `virtual machines snapshots revert <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-snapshots-revert.py>`_
 - `virtual machines snapshots list  <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-snapshots-list.py>`_
 - `virtual machines snapshots new <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-snapshots-new.py>`_
 - `virtual switches create new <https://github.com/jossef/vmwc/blob/master/examples/virtual-switches-create-new.py>`_
