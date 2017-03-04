@@ -57,6 +57,18 @@ class VMWareClient(object):
         for virtual_machine in self._iterate_virtual_machines():
             yield VirtualMachine(self, virtual_machine)
 
+    def revert_to_snapshot(self, vm_name, snapshot_name):
+
+        virtual_machine = self.get_virtual_machine(vm_name)
+        if not virtual_machine:
+            raise Exception('virtual machine "{0}" does not exist'.format(vm_name))
+
+        snapshot = virtual_machine.get_snapshot(snapshot_name)
+        if not snapshot:
+            raise Exception('virtual machine "{0}" does not have a snapshot named "{1}"'.format(vm_name, snapshot_name))
+
+        snapshot.revert()
+
     def _iterate_virtual_machines(self):
         children = self._content.rootFolder.childEntity
         for child in children:
@@ -593,6 +605,10 @@ class VirtualMachine(object):
                 "label": network_interface.deviceInfo.label,
                 "network": network_interface.deviceInfo.summary
             }
+
+    def get_snapshot(self, name):
+        snapshot = next((x for x in self.get_snapshots() if x.name == name), None)
+        return snapshot
 
 
 class VirtualSwitch(object):
