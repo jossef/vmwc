@@ -33,14 +33,19 @@ except Exception as e:
 
 
 class VMWareClient(object):
-    def __init__(self, host, username, password, port=443):
+    def __init__(self, host, username, password, port=443, verify=False):
         self.host = host
         self.username = username
         self.password = password
         self.port = port
+        self.verify = verify
 
     def __enter__(self):
-        self._session = pyVim.connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, port=self.port)
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        if not self.verify:
+            ssl_context.verify_mode = ssl.CERT_NONE
+
+        self._session = pyVim.connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, port=self.port, sslContext=ssl_context)
         self._content = self._session.RetrieveContent()
 
         return self
