@@ -444,11 +444,14 @@ class VMWareClient(object):
 
         return datastore['name']
 
+    def get_guest_operations_manager(self):
+        return self._content.guestOperationsManager
+
 
 class VirtualMachine(object):
     def __init__(self, esx_client, raw_virtual_machine):
 
-        self._esx_client = esx_client
+        self._client = esx_client
         self._raw_virtual_machine = raw_virtual_machine
         self._tools_credentials = None
         self.name = raw_virtual_machine.name
@@ -464,7 +467,7 @@ class VirtualMachine(object):
 
     def _iterate_snapshots(self, snapshots):
         for snapshot in snapshots:
-            yield Snapshot(self._esx_client, snapshot)
+            yield Snapshot(self._client, snapshot)
 
         child_snapshots = map(lambda x: x.childSnapshotList, snapshots)
         for child_snapshot in child_snapshots:
@@ -489,11 +492,11 @@ class VirtualMachine(object):
                 return
 
         task = self._raw_virtual_machine.PowerOnVM_Task()
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def rename(self, new_name):
         task = self._raw_virtual_machine.Rename_Task(new_name)
-        self._esx_client.wait(task)
+        self._client.wait(task)
         self.name = new_name
 
     def power_off(self, verify_state=True):
@@ -504,23 +507,23 @@ class VirtualMachine(object):
                 return
 
         task = self._raw_virtual_machine.PowerOffVM_Task()
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def reboot(self):
         task = self._raw_virtual_machine.ResetVM_Task()
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def remove_all_snapshots(self, consolidate=False):
         task = self._raw_virtual_machine.RemoveAllSnapshots_Task(consolidate)
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def delete(self):
         task = self._raw_virtual_machine.Destroy_Task()
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def take_snapshot(self, name, description="", memory=False, try_persist_disk=True):
         task = self._raw_virtual_machine.CreateSnapshot(name, description, memory, try_persist_disk)
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def configure_bios(self, enter_bios=None, boot_delay=None, boot_order=None):
         spec = vim.vm.ConfigSpec()
@@ -560,11 +563,11 @@ class VirtualMachine(object):
             spec.bootOptions.enterBIOSSetup = enter_bios
 
         task = self._raw_virtual_machine.ReconfigVM_Task(spec=spec)
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def refresh(self):
 
-        virtual_machine = next((x for x in self._esx_client.get_virtual_machines() if x.uuid == self.uuid), None)
+        virtual_machine = next((x for x in self._client.get_virtual_machines() if x.uuid == self.uuid), None)
         if not virtual_machine:
             raise Exception('Virtual Machine "{}" is missing'.format(self.name))
 
@@ -592,16 +595,16 @@ class VirtualMachine(object):
             spec.deviceChange.append(virtual_nic_spec)
 
         task = self._raw_virtual_machine.ReconfigVM_Task(spec=spec)
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def add_network_interface(self, network_name, adapter_type='vmxnet3'):
 
-        network_spec = self._esx_client._add_new_network_interface(network_name, adapter_type)
+        network_spec = self._client._add_new_network_interface(network_name, adapter_type)
 
         spec = vim.vm.ConfigSpec()
         spec.deviceChange = [network_spec]
         task = self._raw_virtual_machine.ReconfigVM_Task(spec=spec)
-        self._esx_client.wait(task)
+        self._client.wait(task)
 
     def get_network_interfaces(self):
 
@@ -636,9 +639,9 @@ class VirtualMachine(object):
                                                        arguments=arguments,
                                                        workingDirectory=working_directory,
                                                        envVariables=enviorment)
-        self._esx_client.guest_ops_manager.processManager.StartProgramInGuest(vm=self._raw_virtual_machine,
-                                                                              auth=self._tools_credentials,
-                                                                              spec=spec)
+        self._client.get_guest_operations_manager().processManager.StartProgramInGuest(vm=self._raw_virtual_machine,
+                                                                                       auth=self._tools_credentials,
+                                                                                       spec=spec)
 
     def send_file(self, source_path, guest_path):
         if self._tools_credentials is None:
@@ -648,15 +651,14 @@ class VirtualMachine(object):
             data = fin.read()
 
         file_attributes = vim.vm.guest.FileManager.FileAttributes()
-        url = self._esx_client.guest_ops_manager.fileManager. \
-            InitiateFileTransferToGuest(vm=self._raw_virtual_machine,
-                                        auth=self._tools_credentials,
-                                        guestFilePath=guest_path,
-                                        fileAttributes=file_attributes,
-                                        fileSize=len(data),
-                                        overwrite=True)
+        url = self._client.get_guest_operations_manager().fileManager.InitiateFileTransferToGuest(vm=self._raw_virtual_machine,
+                                                                                                  auth=self._tools_credentials,
+                                                                                                  guestFilePath=guest_path,
+                                                                                                  fileAttributes=file_attributes,
+                                                                                                  fileSize=len(data),
+                                                                                                  overwrite=True)
 
-        resp = requests.put(url.replace("https://*", "https://" + self._esx_client.host), data=data, verify=False)
+        resp = requests.put(url.replace("https://*", "https://" + self._client.host), data=data, verify=False)
 
         if not resp.status_code == 200:
             raise Exception("Error while uploading file")
@@ -665,11 +667,10 @@ class VirtualMachine(object):
         if self._tools_credentials is None:
             raise Exception("Login required to use guest functions")
 
-        tmp_dir = self._esx_client.guest_ops_manager.fileManager. \
-            CreateTemporaryDirectoryInGuest(vm=self._raw_virtual_machine,
-                                            auth=self._tools_credentials,
-                                            prefix=prefix,
-                                            suffix=suffix)
+        tmp_dir = self._client.get_guest_operations_manager().fileManager.CreateTemporaryDirectoryInGuest(vm=self._raw_virtual_machine,
+                                                                                                          auth=self._tools_credentials,
+                                                                                                          prefix=prefix,
+                                                                                                          suffix=suffix)
         return tmp_dir
 
     def list_processes(self, pids=None):
@@ -678,18 +679,18 @@ class VirtualMachine(object):
 
         for i in xrange(5):
             try:
-                res = self._esx_client.guest_ops_manager.processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
-                                                                                             auth=self._tools_credentials,
-                                                                                             pids=pids)
+                res = self._client.get_guest_operations_manager().processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
+                                                                                                      auth=self._tools_credentials,
+                                                                                                      pids=pids)
                 return res
             except:
                 pass
 
             time.sleep(5)
 
-        return self._esx_client.guest_ops_manager.processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
-                                                                                      auth=self._tools_credentials,
-                                                                                      pids=pids)
+        return self._client.get_guest_operations_manager().processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
+                                                                                               auth=self._tools_credentials,
+                                                                                               pids=pids)
 
 
 class VirtualSwitch(object):
