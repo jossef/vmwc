@@ -41,9 +41,14 @@ class VMWareClient(object):
         self.verify = verify
 
     def __enter__(self):
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-        if not self.verify:
-            ssl_context.verify_mode = ssl.CERT_NONE
+
+        ssl_context = None
+        try:
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            if not self.verify:
+                ssl_context.verify_mode = ssl.CERT_NONE
+        except:
+            pass
 
         self._session = pyVim.connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, port=self.port, sslContext=ssl_context)
         self._content = self._session.RetrieveContent()
@@ -445,6 +450,7 @@ class VirtualMachine(object):
 
         self._esx_client = esx_client
         self._raw_virtual_machine = raw_virtual_machine
+        self._tools_credentials = None
         self.name = raw_virtual_machine.name
         self.uuid = raw_virtual_machine.summary.config.uuid
 
@@ -609,6 +615,81 @@ class VirtualMachine(object):
     def get_snapshot(self, name):
         snapshot = next((x for x in self.get_snapshots() if x.name == name), None)
         return snapshot
+
+    def get_tools_status(self):
+        return self._raw_virtual_machine.guest.toolsStatus
+
+    def is_tools_working_properly(self):
+        tools_status = self.get_tools_status()
+        return (tools_status != "toolsNotInstalled" and
+                tools_status != "toolsNotRunning")
+
+    def guest_login(self, username, password):
+        self._tools_credentials = vim.vm.guest.NamePasswordAuthentication(username=username,
+                                                                          password=password)
+
+    def run_process(self, program_path, arguments="", working_directory=None, enviorment=None):
+        if self._tools_credentials is None:
+            raise Exception("Login required to use guest functions")
+
+        spec = vim.vm.guest.ProcessManager.ProgramSpec(programPath=program_path,
+                                                       arguments=arguments,
+                                                       workingDirectory=working_directory,
+                                                       envVariables=enviorment)
+        self._esx_client.guest_ops_manager.processManager.StartProgramInGuest(vm=self._raw_virtual_machine,
+                                                                              auth=self._tools_credentials,
+                                                                              spec=spec)
+
+    def send_file(self, source_path, guest_path):
+        if self._tools_credentials is None:
+            raise Exception("Login required to use guest functions")
+
+        with open(source_path, "rb") as fin:
+            data = fin.read()
+
+        file_attributes = vim.vm.guest.FileManager.FileAttributes()
+        url = self._esx_client.guest_ops_manager.fileManager. \
+            InitiateFileTransferToGuest(vm=self._raw_virtual_machine,
+                                        auth=self._tools_credentials,
+                                        guestFilePath=guest_path,
+                                        fileAttributes=file_attributes,
+                                        fileSize=len(data),
+                                        overwrite=True)
+
+        resp = requests.put(url.replace("https://*", "https://" + self._esx_client.host), data=data, verify=False)
+
+        if not resp.status_code == 200:
+            raise Exception("Error while uploading file")
+
+    def create_temp_directory(self, prefix, suffix=""):
+        if self._tools_credentials is None:
+            raise Exception("Login required to use guest functions")
+
+        tmp_dir = self._esx_client.guest_ops_manager.fileManager. \
+            CreateTemporaryDirectoryInGuest(vm=self._raw_virtual_machine,
+                                            auth=self._tools_credentials,
+                                            prefix=prefix,
+                                            suffix=suffix)
+        return tmp_dir
+
+    def list_processes(self, pids=None):
+        if self._tools_credentials is None:
+            raise Exception("Login required to use guest functions")
+
+        for i in xrange(5):
+            try:
+                res = self._esx_client.guest_ops_manager.processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
+                                                                                             auth=self._tools_credentials,
+                                                                                             pids=pids)
+                return res
+            except:
+                pass
+
+            time.sleep(5)
+
+        return self._esx_client.guest_ops_manager.processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
+                                                                                      auth=self._tools_credentials,
+                                                                                      pids=pids)
 
 
 class VirtualSwitch(object):
