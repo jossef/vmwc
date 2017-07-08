@@ -32,6 +32,7 @@ pip install vmwc
  - [virtual machines create new](examples/virtual-machines-create-new.py)
  - [virtual machines delete](examples/virtual-machines-delete.py)
  - [virtual machines list](examples/virtual-machines-list.py)
+ - [virtual machines download file](examples/virtual-machines-download-file.py)
  - [virtual machines power off](examples/virtual-machines-power-off.py)
  - [virtual machines power on](examples/virtual-machines-power-on.py)
  - [virtual machines reboot](examples/virtual-machines-reboot.py)
