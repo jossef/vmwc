@@ -1,8 +1,8 @@
-![banner-01](https://cloud.githubusercontent.com/assets/1287098/23579240/b873ab2a-00f1-11e7-99f0-2d31b0f0e1e0.png)
+![banner-01](https://user-images.githubusercontent.com/1287098/28493829-622afba8-6f26-11e7-98f2-e0b5a25a2426.png)
 
-## Simplified VMWare API client for Python
+## Simpler VMWare SDK client for Python
 
-vmwc is designed to be the simplest way possible to use VMWare's API
+vmwc is designed to be the simplest way possible to use VMWare's SDK
 
 
 ```python
