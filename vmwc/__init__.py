@@ -663,6 +663,27 @@ class VirtualMachine(object):
         if not resp.status_code == 200:
             raise Exception("Error while uploading file")
 
+    def download_file(self, guest_path, local_path, chunk_size=1024):
+        if self._tools_credentials is None:
+            raise Exception("Login required to use guest functions")
+
+        fti = self._client.get_guest_operations_manager().fileManager.InitiateFileTransferFromGuest(vm=self._raw_virtual_machine,
+                                                                                                    auth=self._tools_credentials,
+                                                                                                    guestFilePath=guest_path)
+
+        resp = requests.get(fti.url.replace("https://*", "https://" + self._client.host), verify=self._client.verify)
+
+        if not resp.status_code == 200:
+            raise Exception("Error while downloading file")
+
+        size = 0
+        with open(local_path, 'wb') as f:
+            for chunk in resp.iter_content(chunk_size=chunk_size):
+                if chunk:
+                    f.write(chunk)
+                    size += len(chunk)
+        return size
+
     def create_temp_directory(self, prefix, suffix=""):
         if self._tools_credentials is None:
             raise Exception("Login required to use guest functions")
