@@ -627,91 +627,90 @@ class VirtualMachine(object):
         return (tools_status != "toolsNotInstalled" and
                 tools_status != "toolsNotRunning")
 
-    def guest_login(self, username, password):
+    def vmware_tools_login(self, username, password):
         self._tools_credentials = vim.vm.guest.NamePasswordAuthentication(username=username,
                                                                           password=password)
 
-    def run_process(self, program_path, arguments="", working_directory=None, enviorment=None):
-        if self._tools_credentials is None:
-            raise Exception("Login required to use guest functions")
+    def vmware_tools_execute_process(self, program_path, arguments="", working_directory=None, environment_variables=None):
+        self._ensure_vmware_tools_logged_in()
 
         spec = vim.vm.guest.ProcessManager.ProgramSpec(programPath=program_path,
                                                        arguments=arguments,
                                                        workingDirectory=working_directory,
-                                                       envVariables=enviorment)
+                                                       envVariables=environment_variables)
+
         self._client.get_guest_operations_manager().processManager.StartProgramInGuest(vm=self._raw_virtual_machine,
                                                                                        auth=self._tools_credentials,
                                                                                        spec=spec)
 
-    def send_file(self, source_path, guest_path):
+    def _ensure_vmware_tools_logged_in(self):
         if self._tools_credentials is None:
-            raise Exception("Login required to use guest functions")
+            raise Exception("VMWare tools login is required in order to use this functionality")
 
-        with open(source_path, "rb") as fin:
+    def vmware_tools_upload_file(self, local_file_path, remote_file_path):
+        self._ensure_vmware_tools_logged_in()
+
+        with open(local_file_path, "rb") as fin:
             data = fin.read()
 
         file_attributes = vim.vm.guest.FileManager.FileAttributes()
         url = self._client.get_guest_operations_manager().fileManager.InitiateFileTransferToGuest(vm=self._raw_virtual_machine,
                                                                                                   auth=self._tools_credentials,
-                                                                                                  guestFilePath=guest_path,
+                                                                                                  guestFilePath=remote_file_path,
                                                                                                   fileAttributes=file_attributes,
                                                                                                   fileSize=len(data),
                                                                                                   overwrite=True)
 
-        resp = requests.put(url.replace("https://*", "https://" + self._client.host), data=data, verify=False)
+        url = self._normalize_url(url)
+        r = requests.put(url, data=data, verify=False)
+        r.raise_for_status()
 
-        if not resp.status_code == 200:
-            raise Exception("Error while uploading file")
+    def _normalize_url(self, url):
+        return url.replace("https://*", "https://" + self._client.host)
 
-    def download_file(self, guest_path, local_path, chunk_size=1024):
-        if self._tools_credentials is None:
-            raise Exception("Login required to use guest functions")
+    def vmware_tools_download_file(self, local_file_path, remote_file_path, chunk_size=1024):
+        self._ensure_vmware_tools_logged_in()
 
         fti = self._client.get_guest_operations_manager().fileManager.InitiateFileTransferFromGuest(vm=self._raw_virtual_machine,
                                                                                                     auth=self._tools_credentials,
-                                                                                                    guestFilePath=guest_path)
+                                                                                                    guestFilePath=remote_file_path)
 
-        resp = requests.get(fti.url.replace("https://*", "https://" + self._client.host), verify=self._client.verify)
-
-        if not resp.status_code == 200:
-            raise Exception("Error while downloading file")
+        url = self._normalize_url(fti.url)
+        r = requests.get(url, verify=self._client.verify)
+        r.raise_for_status()
 
         size = 0
-        with open(local_path, 'wb') as f:
-            for chunk in resp.iter_content(chunk_size=chunk_size):
+        with open(local_file_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=chunk_size):
                 if chunk:
                     f.write(chunk)
                     size += len(chunk)
         return size
 
-    def create_temp_directory(self, prefix, suffix=""):
-        if self._tools_credentials is None:
-            raise Exception("Login required to use guest functions")
+    def vmware_tools_create_temporary_directory(self, prefix, suffix=""):
+        self._ensure_vmware_tools_logged_in()
 
-        tmp_dir = self._client.get_guest_operations_manager().fileManager.CreateTemporaryDirectoryInGuest(vm=self._raw_virtual_machine,
-                                                                                                          auth=self._tools_credentials,
-                                                                                                          prefix=prefix,
-                                                                                                          suffix=suffix)
-        return tmp_dir
+        temporary_directory = self._client.get_guest_operations_manager().fileManager.CreateTemporaryDirectoryInGuest(vm=self._raw_virtual_machine,
+                                                                                                                      auth=self._tools_credentials,
+                                                                                                                      prefix=prefix,
+                                                                                                                      suffix=suffix)
+        return temporary_directory
 
-    def list_processes(self, pids=None):
-        if self._tools_credentials is None:
-            raise Exception("Login required to use guest functions")
+    def vmware_tools_list_processes(self, pids=None, max_retries=5, retry_delay_seconds=5):
+        self._ensure_vmware_tools_logged_in()
 
-        for i in xrange(5):
+        attempt = 0
+        while True:
             try:
-                res = self._client.get_guest_operations_manager().processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
-                                                                                                      auth=self._tools_credentials,
-                                                                                                      pids=pids)
-                return res
+                response = self._client.get_guest_operations_manager().processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
+                                                                                                           auth=self._tools_credentials,
+                                                                                                           pids=pids)
+                return response
             except:
-                pass
-
-            time.sleep(5)
-
-        return self._client.get_guest_operations_manager().processManager.ListProcessesInGuest(vm=self._raw_virtual_machine,
-                                                                                               auth=self._tools_credentials,
-                                                                                               pids=pids)
+                attempt += 1
+                if attempt > max_retries:
+                    raise
+                time.sleep(retry_delay_seconds)
 
 
 class VirtualSwitch(object):
