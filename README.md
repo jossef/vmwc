@@ -1,4 +1,4 @@
-![banner-01](https://user-images.githubusercontent.com/1287098/28493829-622afba8-6f26-11e7-98f2-e0b5a25a2426.png)
+![banner-01](https://user-images.githubusercontent.com/1287098/28493843-b889ce8e-6f26-11e7-97ec-cc180a760051.png)
 
 ## Simpler VMWare SDK client for Python
 
