@@ -770,6 +770,15 @@ class Snapshot(object):
         self._raw_snapshot = raw_snapshot
         self.id = raw_snapshot.id
         self.name = raw_snapshot.name
+        self.description = raw_snapshot.description
+        self.timestamp = raw_snapshot.createTime
+        self.is_powered_on = raw_snapshot.state == 'poweredOn'
+
+    def rename(self, name):
+        raise NotImplemented()
+
+    def setDescription(self, description):
+        raise NotImplemented()
 
     def revert(self):
         task = self._raw_snapshot.snapshot.RevertToSnapshot_Task()
