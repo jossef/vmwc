@@ -172,6 +172,7 @@ class VMWareClient(object):
 
                 datastore = {
                     'name': host_mount_info.volume.name,
+                    'disks': [item.diskName for item in host_mount_info.volume.extent],
                     'uuid': host_mount_info.volume.uuid,
                     'capacity': host_mount_info.volume.capacity,
                     'vmfs_version': host_mount_info.volume.version,
@@ -774,11 +775,9 @@ class Snapshot(object):
         self.timestamp = raw_snapshot.createTime
         self.is_powered_on = raw_snapshot.state == 'poweredOn'
 
-    def rename(self, name):
-        raise NotImplemented()
-
-    def setDescription(self, description):
-        raise NotImplemented()
+    def rename(self, name, description):
+        task = self._raw_snapshot.snapshot.RenameSnapshot(name, description)
+        self._esx_client.wait(task)
 
     def revert(self):
         task = self._raw_snapshot.snapshot.RevertToSnapshot_Task()
