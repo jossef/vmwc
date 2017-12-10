@@ -54,3 +54,9 @@ When I searched for a library to write automation scripts to control my esxi env
 ### Remarks
 vmwc was developed to control a single esxi machine at a time. However, it should work with vcenter instances as well
 
+### Uploading a new version
+
+```
+python setup.py bdist_wheel
+twine upload dist/*
+```
