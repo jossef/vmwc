@@ -182,6 +182,64 @@ class VMWareClient(object):
 
                 yield datastore
 
+    def get_services(self):
+
+        objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
+        esxi_hosts = objview.view
+        objview.Destroy()
+
+        for esxi_host in esxi_hosts:
+
+            service_system = esxi_host.configManager.serviceSystem
+            services = service_system.serviceInfo.service
+
+            for service in services:
+                policy = {
+                    'id': service.key,
+                    'name': service.label,
+                    'running': service.running,
+                }
+
+                yield policy
+
+    def start_service(self, service_id):
+
+        objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
+        esxi_hosts = objview.view
+        objview.Destroy()
+
+        for esxi_host in esxi_hosts:
+            service_system = esxi_host.configManager.serviceSystem
+            service_system.StartService(service_id)
+
+    def restart_service(self, service_id):
+
+        objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
+        esxi_hosts = objview.view
+        objview.Destroy()
+
+        for esxi_host in esxi_hosts:
+            service_system = esxi_host.configManager.serviceSystem
+            service_system.RestartService(service_id)
+
+    def stop_service(self, service_id):
+
+        objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
+        esxi_hosts = objview.view
+        objview.Destroy()
+
+        for esxi_host in esxi_hosts:
+            service_system = esxi_host.configManager.serviceSystem
+            service_system.StopService(service_id)
+
+    def enable_ssh(self):
+        service_id = 'TSM-SSH'
+        self.start_service(service_id)
+
+    def disable_ssh(self):
+        service_id = 'TSM-SSH'
+        self.stop_service(service_id)
+
     def _get_single_esxi_host(self):
         objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
         esxi_hosts = objview.view
