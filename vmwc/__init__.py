@@ -182,6 +182,23 @@ class VMWareClient(object):
 
                 yield datastore
 
+    def get_licenses(self):
+
+        licenses = self._content.licenseManager.licenses
+        for item in licenses:
+
+            if not item.licenseKey:
+                continue
+
+            yield item.licenseKey
+
+    def delete_all_licenses(self):
+        for license in self.get_licenses():
+            self._content.licenseManager.RemoveLicense(license)
+
+    def replace_license(self, license):
+        self._content.licenseManager.UpdateLicense(license)
+
     def get_services(self):
 
         objview = self._content.viewManager.CreateContainerView(self._content.rootFolder, [vim.HostSystem], True)
