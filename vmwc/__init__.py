@@ -2,6 +2,7 @@ import logging
 import random
 import requests
 import time
+import datetime
 import sys
 
 # ----------------------------------
@@ -181,6 +182,20 @@ class VMWareClient(object):
                 }
 
                 yield datastore
+
+    def set_server_datetime(self, new_value=None):
+
+        if not new_value:
+            new_value = datetime.datetime.now()
+
+        esxi_host = self._get_single_esxi_host()
+        date_time_manager = esxi_host.configManager.dateTimeSystem
+        date_time_manager.UpdateDateTime(new_value)
+
+    def get_server_datetime(self):
+        esxi_host = self._get_single_esxi_host()
+        date_time_manager = esxi_host.configManager.dateTimeSystem
+        return date_time_manager.QueryDateTime()
 
     def get_licenses(self):
 
