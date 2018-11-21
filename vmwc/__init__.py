@@ -589,7 +589,7 @@ class VirtualMachine(object):
         task = self._raw_virtual_machine.Rename_Task(new_name)
         self._client.wait(task)
         self.name = new_name
-        
+
     def shutdown(self, verify_state=True):
 
         if verify_state:
@@ -731,7 +731,7 @@ class VirtualMachine(object):
         self._tools_credentials = vim.vm.guest.NamePasswordAuthentication(username=username,
                                                                           password=password)
 
-    def vmware_tools_execute_process(self, program_path, arguments="", working_directory=None, environment_variables=None):
+    def vmware_tools_execute_process(self, program_path, working_directory, arguments="", environment_variables=None):
         self._ensure_vmware_tools_logged_in()
 
         spec = vim.vm.guest.ProcessManager.ProgramSpec(programPath=program_path,
