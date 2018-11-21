@@ -31,12 +31,15 @@ Installation
 Examples
 ^^^^^^^^
 
+- `set server datetime <https://github.com/jossef/vmwc/blob/master/examples/set-server-datetime.py>`_
+- `replace license <https://github.com/jossef/vmwc/blob/master/examples/replace-license.py>`_
 - `datastores list <https://github.com/jossef/vmwc/blob/master/examples/datastores-list.py>`_
 - `virtual machines create new <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-create-new.py>`_
 - `virtual machines delete <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-delete.py>`_
 - `virtual machines list <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-list.py>`_
 - `virtual machines power off <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-power-off.py>`_
 - `virtual machines power on <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-power-on.py>`_
+- `virtual machines shutdown <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-shutdown.py>`_
 - `virtual machines reboot <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-reboot.py>`_
 - `virtual machines reconfigure bios <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-reconfigure-bios.py>`_
 - `virtual machines reconfigure network interfaces <https://github.com/jossef/vmwc/blob/master/examples/virtual-machines-reconfigure-network-interfaces.py>`_
