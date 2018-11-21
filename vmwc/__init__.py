@@ -589,6 +589,15 @@ class VirtualMachine(object):
         task = self._raw_virtual_machine.Rename_Task(new_name)
         self._client.wait(task)
         self.name = new_name
+        
+    def shutdown(self, verify_state=True):
+
+        if verify_state:
+            self.refresh()
+            if self.is_powered_off():
+                return
+
+        self._raw_virtual_machine.ShutdownGuest()
 
     def power_off(self, verify_state=True):
 
