@@ -303,13 +303,14 @@ class VMWareClient(object):
 
         return datastore
 
-    def new_virtual_machine(self, name, remove_existing=False, cpus=1, ram_mb=512, datastore_name=None, vm_version=8, operating_system_type='ubuntu64Guest', thin_provision=True, disk_size_gb=100, network_name='VM Network'):
+    def new_virtual_machine(self, name, remove_existing=False, cpus=1, ram_mb=512, datastore_name=None, vm_version=8, operating_system_type='ubuntu64Guest', thin_provision=True, disk_size_gb=100, network_name='VM Network', mac_address=None):
         """
         :param name:
         :param cpus:
         :param ram_mb:
         :param datastore_name:
         :param vm_version:
+        :param mac_address:
         :param operating_system_type: see full list here - https://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
         :return:
         """
@@ -351,7 +352,7 @@ class VMWareClient(object):
 
         scsi, scsi_controller_key = self._add_new_scsi_controller('SCSI-001')
         disk = self._add_new_hard_disk('DISK-001', disk_size_gb, unit_number=unit_number, controller_key=scsi_controller_key, thin_provision=thin_provision, datastore_path=datastore_path, vm_name=name)
-        nic = self._add_new_network_interface(network_name)
+        nic = self._add_new_network_interface(network_name, mac_address=mac_address)
 
         config.deviceChange = [scsi, disk, nic]
 
@@ -371,7 +372,7 @@ class VMWareClient(object):
 
         return None
 
-    def _add_new_network_interface(self, network_name, adapter_type='vmxnet3', connect_on_power_on=True, connected=True, wake_on_lan_enabled=False):
+    def _add_new_network_interface(self, network_name, adapter_type='vmxnet3', connect_on_power_on=True, connected=True, wake_on_lan_enabled=False, mac_address=None):
         key = random.randint(-4099, -4000)
 
         network_spec = vim.vm.device.VirtualDeviceSpec()
@@ -392,6 +393,9 @@ class VMWareClient(object):
 
         network_spec.device.key = key
         network_spec.device.addressType = "generated"
+        if mac_address:
+            network_spec.device.addressType = "manual"
+            network_spec.device.macAddress = mac_address
         network_spec.device.backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
         network_spec.device.backing.deviceName = network_name
         network_spec.device.backing.network = self._get_property(vim.Network, network_name)
