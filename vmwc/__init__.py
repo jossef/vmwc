@@ -163,6 +163,9 @@ class VMWareClient(object):
 
             # All Filesystems on ESXi host
             storage_system = esxi_host.configManager.storageSystem
+            if storage_system.fileSystemVolumeInfo is None:
+                continue
+                
             host_file_sys_vol_mount_info = storage_system.fileSystemVolumeInfo.mountInfo
 
             for host_mount_info in host_file_sys_vol_mount_info:
